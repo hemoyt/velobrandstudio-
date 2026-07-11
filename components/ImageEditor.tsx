@@ -1,10 +1,11 @@
-
+'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from './Button';
-import { editImage } from '../services/geminiService';
+import { editImageAction } from '@/lib/ai-client';
 
 interface ImageEditorProps {
+  projectId: string;
   initialImage: string;
   assetType?: string;
   overlayImage?: string; // The logo to place on top
@@ -39,7 +40,7 @@ interface TextLayer {
   fontWeight: string;
 }
 
-export const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, assetType, overlayImage, onClose, onSave }) => {
+export const ImageEditor: React.FC<ImageEditorProps> = ({ projectId, initialImage, assetType, overlayImage, onClose, onSave }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [baseImageObj, setBaseImageObj] = useState<HTMLImageElement | null>(null);
@@ -438,7 +439,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, assetTyp
         const cleanPrompt = "Remove all logos, branding, text, and graphics from the objects in this image. Keep the lighting, textures, and background exactly the same. Make the surfaces blank.";
         // We edit the base image (which is history[historyIndex])
         const currentBase = history[historyIndex];
-        const newBase = await editImage(currentBase, cleanPrompt);
+        const newBase = await editImageAction(projectId, currentBase, cleanPrompt);
         
         const newHistory = history.slice(0, historyIndex + 1);
         newHistory.push(newBase);
@@ -464,7 +465,7 @@ export const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, assetTyp
     // This captures the whole scene (including overlays) and sends to AI
     const currentDataUrl = canvasRef.current.toDataURL('image/png');
     try {
-      const newImage = await editImage(currentDataUrl, prompt);
+      const newImage = await editImageAction(projectId, currentDataUrl, prompt);
       const newHistory = history.slice(0, historyIndex + 1);
       newHistory.push(newImage);
       setHistory(newHistory);

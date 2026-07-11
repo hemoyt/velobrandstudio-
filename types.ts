@@ -1,15 +1,3 @@
-
-
-export enum AppState {
-  AGENCY_HUB = 'AGENCY_HUB',
-  INPUT = 'INPUT',
-  LOGO_GENERATION = 'LOGO_GENERATION',
-  LOGO_SELECTION = 'LOGO_SELECTION',
-  BRAND_GENERATION = 'BRAND_GENERATION',
-  DASHBOARD = 'DASHBOARD',
-  VIDEO_STUDIO = 'VIDEO_STUDIO'
-}
-
 export interface GeneratedImage {
   id: string;
   url: string;
@@ -36,13 +24,13 @@ export interface BrandIdentity {
   };
   brandVoice: string;
   tagline: string;
-  targetAudience: string; // Added for better context awareness
+  targetAudience: string;
 }
 
 export enum ImageSize {
   SIZE_1K = '1K',
   SIZE_2K = '2K',
-  SIZE_4K = '4K'
+  SIZE_4K = '4K',
 }
 
 export enum SocialPlatform {
@@ -50,7 +38,7 @@ export enum SocialPlatform {
   TWITTER = 'Twitter (X)',
   FACEBOOK = 'Facebook',
   LINKEDIN = 'LinkedIn',
-  STORY = 'IG/TikTok Story'
+  STORY = 'IG/TikTok Story',
 }
 
 export enum IndustryType {
@@ -59,7 +47,7 @@ export enum IndustryType {
   FASHION = 'Fashion / Apparel',
   RETAIL = 'Retail / Product',
   HOSPITALITY = 'Restaurant / Bar',
-  COFFEE = 'Coffee Shop'
+  COFFEE = 'Coffee Shop',
 }
 
 export enum LogoStyle {
@@ -70,30 +58,7 @@ export enum LogoStyle {
   MASCOT = 'Mascot / Character',
   HAND_DRAWN = 'Hand-Drawn / Organic',
   CYBERPUNK = 'Cyberpunk / Futuristic',
-  THREE_D = '3D / Glossy'
-}
-
-export enum ProjectStatus {
-  DRAFT = 'Draft',
-  IN_REVIEW = 'In Review',
-  APPROVED = 'Approved',
-  ARCHIVED = 'Archived'
-}
-
-export interface AgencyProject {
-  id: string;
-  clientName: string;
-  industry: IndustryType;
-  status: ProjectStatus;
-  lastModified: Date;
-  thumbnailUrl?: string;
-  data?: {
-    brandIdentity: BrandIdentity;
-    selectedLogo: GeneratedImage;
-    assets: GeneratedImage[];
-    socialPlatform: SocialPlatform;
-    videos?: GeneratedVideo[];
-  }
+  THREE_D = '3D / Glossy',
 }
 
 export interface SearchResult {

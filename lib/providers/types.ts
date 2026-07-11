@@ -44,4 +44,5 @@ export interface AIProvider {
   enhanceDescription?(description: string): Promise<string>;
   optimizeVideoPrompt?(prompt: string): Promise<string>;
   generateVideo?(params: VideoGenParams): Promise<string>;
+  describeFromWebsite?(params: { title: string; text: string; url: string }): Promise<string>;
 }

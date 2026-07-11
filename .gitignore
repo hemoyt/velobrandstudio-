@@ -22,6 +22,9 @@ next-env.d.ts
 supabase/.branches
 supabase/.temp
 
+# Local storage backend output (generated brand kits when running locally)
+/design
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

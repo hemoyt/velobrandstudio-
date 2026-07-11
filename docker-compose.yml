@@ -15,7 +15,17 @@ services:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       INVITE_FROM_EMAIL: ${INVITE_FROM_EMAIL:-}
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-local}
+      LOCAL_STORAGE_DIR: /data/design
+    volumes:
+      # Persist generated brand kits (local storage backend) across restarts.
+      # Skip this and set STORAGE_BACKEND=supabase instead if you'd rather
+      # keep everything in Supabase Storage.
+      - design-data:/data/design
     restart: unless-stopped
+
+volumes:
+  design-data:
 
 # This only runs the app container. Point it at Supabase's hosted free tier
 # (fastest to get started) or a self-hosted Supabase stack — see

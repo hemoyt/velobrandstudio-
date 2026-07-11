@@ -54,6 +54,9 @@ export const optimizePromptAction = (projectId: string, description: string, sty
     (r) => r.text,
   );
 
+export const importWebsiteAction = (projectId: string, url: string): Promise<string> =>
+  postJSON<{ description: string }>('/api/ai/import-website', { projectId, url }).then((r) => r.description);
+
 export const enhanceDescriptionAction = (projectId: string, description: string): Promise<string> =>
   postJSON<{ text: string }>('/api/ai/prompt', { projectId, kind: 'enhance-description', text: description }).then(
     (r) => r.text,

@@ -10,6 +10,7 @@ import {
   generateBrandTextAction,
   optimizePromptAction,
   enhanceDescriptionAction,
+  importWebsiteAction,
   uploadAssetAction,
   type GeneratedAssetResult,
 } from '@/lib/ai-client';
@@ -49,6 +50,12 @@ export function ProjectSetupWizard({
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
 
+  // Brief source: write it, or import it from an existing website
+  const [briefSource, setBriefSource] = useState<'write' | 'website'>('write');
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+
   // Package step config
   const [selectedMockupIds, setSelectedMockupIds] = useState<string[]>(
     MOCKUP_PRESETS[industry].slice(0, 3).map((m) => m.id),
@@ -72,6 +79,20 @@ export function ProjectSetupWizard({
       console.error(err);
     } finally {
       setIsEnhancing(false);
+    }
+  };
+
+  const handleImportWebsite = async () => {
+    if (!websiteUrl.trim()) return;
+    setIsImporting(true);
+    setImportError(null);
+    try {
+      setBusinessDesc(await importWebsiteAction(projectId, websiteUrl.trim()));
+      setBriefSource('write');
+    } catch (err: any) {
+      setImportError(err.message || 'Failed to import that website');
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -470,20 +491,61 @@ export function ProjectSetupWizard({
             <div>
               <div className="flex justify-between items-end mb-4">
                 <label className="text-xs font-bold text-stone-400 uppercase tracking-widest">Business description</label>
-                <button
-                  onClick={handleEnhance}
-                  disabled={!businessDesc || isEnhancing}
-                  className="text-xs font-bold text-indigo-600 hover:text-indigo-800 disabled:opacity-50 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-full border border-indigo-100"
-                >
-                  {isEnhancing ? 'Refining...' : 'AI Enhance'}
-                </button>
+                <div className="flex rounded-full border border-stone-200 p-1 bg-stone-50">
+                  <button
+                    onClick={() => setBriefSource('write')}
+                    className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${briefSource === 'write' ? 'bg-stone-900 text-white' : 'text-stone-500'}`}
+                  >
+                    Write it
+                  </button>
+                  <button
+                    onClick={() => setBriefSource('website')}
+                    className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${briefSource === 'website' ? 'bg-stone-900 text-white' : 'text-stone-500'}`}
+                  >
+                    Import from website
+                  </button>
+                </div>
               </div>
-              <textarea
-                className="w-full p-6 bg-stone-50 border border-stone-200 rounded-2xl h-48 focus:ring-2 focus:ring-stone-900 focus:outline-none resize-none text-stone-800 placeholder-stone-400 text-lg leading-relaxed font-light"
-                placeholder="e.g. A sustainable coffee roastery in Portland called 'Moss & Mist' that focuses on fair trade beans and a cozy, rainy-day atmosphere..."
-                value={businessDesc}
-                onChange={(e) => setBusinessDesc(e.target.value)}
-              />
+
+              {briefSource === 'website' ? (
+                <div className="p-6 bg-stone-50 border border-stone-200 rounded-2xl space-y-3">
+                  <p className="text-sm text-stone-500">Paste your website URL and we&apos;ll read it to draft the brief.</p>
+                  <div className="flex gap-3">
+                    <input
+                      type="url"
+                      value={websiteUrl}
+                      onChange={(e) => setWebsiteUrl(e.target.value)}
+                      placeholder="https://your-business.com"
+                      className="flex-1 px-4 py-2.5 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-stone-900"
+                    />
+                    <Button onClick={handleImportWebsite} isLoading={isImporting} disabled={!websiteUrl.trim()}>
+                      Analyze
+                    </Button>
+                  </div>
+                  {importError && <p className="text-sm text-red-600">{importError}</p>}
+                  {businessDesc && (
+                    <p className="text-sm text-stone-700 bg-white p-4 rounded-xl border border-stone-200 leading-relaxed">{businessDesc}</p>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-end mb-2">
+                    <button
+                      onClick={handleEnhance}
+                      disabled={!businessDesc || isEnhancing}
+                      className="text-xs font-bold text-indigo-600 hover:text-indigo-800 disabled:opacity-50 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-full border border-indigo-100"
+                    >
+                      {isEnhancing ? 'Refining...' : 'AI Enhance'}
+                    </button>
+                  </div>
+                  <textarea
+                    className="w-full p-6 bg-stone-50 border border-stone-200 rounded-2xl h-48 focus:ring-2 focus:ring-stone-900 focus:outline-none resize-none text-stone-800 placeholder-stone-400 text-lg leading-relaxed font-light"
+                    placeholder="e.g. A sustainable coffee roastery in Portland called 'Moss & Mist' that focuses on fair trade beans and a cozy, rainy-day atmosphere..."
+                    value={businessDesc}
+                    onChange={(e) => setBusinessDesc(e.target.value)}
+                  />
+                </>
+              )}
             </div>
 
             {error && <div className="text-red-500 text-sm p-4 bg-red-50 rounded-xl border border-red-100">{error}</div>}

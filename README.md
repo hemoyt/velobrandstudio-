@@ -4,6 +4,7 @@ Open-source, team-based AI brand identity generator. Describe a business and gen
 
 ## Features
 
+- **Start from a brief or an existing website** — write a business description, or paste a URL and let Gemini read the page and draft the brief for you.
 - **Logo generation & selection** — multiple concepts per brief, styled (minimalist, vintage, luxury, cyberpunk, and more).
 - **Brand identity** — AI-generated tagline, brand voice, target audience, color palette, and typography.
 - **Full asset packages** — industry-aware mockups (tech, fashion, retail, hospitality, coffee, general), business cards, and social templates, generated concurrently.
@@ -36,6 +37,8 @@ cp .env.example .env.local   # fill in Supabase URL/keys + ENCRYPTION_KEY
 npm run dev
 ```
 
+Generated logos, mockups, and videos are written straight to a `design/` folder next to the repo — that's the default storage backend outside of Vercel, so there's nothing extra to configure for local use. Set `STORAGE_BACKEND=supabase` in `.env.local` if you'd rather keep everything in Supabase Storage instead (this is required, and auto-selected, when deploying to Vercel — see [Known limitations](#known-limitations)).
+
 ## Self-host with Docker
 
 ```bash
@@ -54,6 +57,8 @@ This only runs the app container — point `NEXT_PUBLIC_SUPABASE_URL` at Supabas
 
 ## Known limitations
 
+- **Local storage backend isn't for serverless.** The default `local` backend writes to a `design/` folder on disk, which doesn't persist on Vercel — it's auto-switched to `supabase` there. If you self-host on a platform with an ephemeral filesystem (not a normal VM/Docker host), set `STORAGE_BACKEND=supabase` explicitly.
+- **Website import fetches whatever URL a team member pastes**, from the server. It blocks the obvious cases (localhost, private/internal IP ranges, non-HTTP schemes) via a DNS pre-check, but a sophisticated DNS-rebinding attack could still slip past that check before the actual fetch — treat this as reducing, not eliminating, SSRF risk, and don't expose it to untrusted users beyond your own team members (it already requires editor+ access).
 - **Video generation and Vercel's function timeout**: Veo generation can take minutes. Self-hosting with `next start`/Docker has no timeout; on Vercel you'll need a plan that supports an extended `maxDuration` for `app/api/ai/video/route.ts`.
 - **No job queue** — image/video generation runs synchronously inside the request. Fine for the current scale; a background queue would be the next step for heavier usage.
 - **Per-project sharing** (`project_shares` table) is implemented in the schema and RLS but has no dedicated settings UI yet — it can be managed directly via SQL/the Supabase dashboard today.

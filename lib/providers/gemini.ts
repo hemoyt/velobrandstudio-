@@ -108,6 +108,12 @@ export function createGeminiProvider(apiKey: string): AIProvider {
       return response.text || description;
     },
 
+    async describeFromWebsite({ title, text, url }: { title: string; text: string; url: string }): Promise<string> {
+      const prompt = `You are helping fill in a business description for a brand identity generator. Based on the following website content, write a concise (2-4 sentence) business description covering what the business does, its vibe/positioning, and target audience. Write it as a standalone description, not as commentary about the website.\n\nURL: ${url}\nTitle: ${title}\nContent: ${text}`;
+      const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+      return response.text || '';
+    },
+
     async optimizeVideoPrompt(prompt: string): Promise<string> {
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',

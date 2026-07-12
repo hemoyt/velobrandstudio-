@@ -136,7 +136,7 @@ export function ProjectDashboard({
             </Button>
           </Link>
           <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={!brandIdentity}>
-            Export PDF
+            Export Brand Guidelines
           </Button>
           <Button size="sm" onClick={handleShare}>
             {shareUrl ? 'Copy Share Link' : 'Create Share Link'}

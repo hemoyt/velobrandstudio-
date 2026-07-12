@@ -71,6 +71,16 @@ export const MOCKUP_PRESETS: Record<IndustryType, MockupPreset[]> = {
   ],
 };
 
+// Industry-agnostic brand collateral, offered alongside the industry-specific
+// mockups above so every kit can include the "boring but essential" pieces of
+// a real studio deliverable, not just hero shots.
+export const ESSENTIALS_PRESETS: MockupPreset[] = [
+  { id: 'letterhead', label: 'Letterhead', prompt: 'Clean corporate letterhead design, logo top-left, minimal footer with placeholder contact details, printed on premium paper, flat-lay top-down shot.', ratio: '3:4' },
+  { id: 'email-signature', label: 'Email Signature', prompt: 'A modern email signature banner design featuring the logo, a thin divider line, and placeholder name/title/contact text, flat digital mockup on a white background.', ratio: '16:9' },
+  { id: 'presentation-cover', label: 'Presentation Cover Slide', prompt: 'A minimal pitch-deck title slide mockup with the logo centered, elegant typography placeholder for a title, subtle brand-color gradient background.', ratio: '16:9' },
+  { id: 'favicon-set', label: 'Favicon / App Icon Set', prompt: 'A grid of the logo mark rendered as app icons and favicons at several sizes, rounded-square and circle variants, on a neutral studio background, product-shot style.', ratio: '1:1' },
+];
+
 export const fileToBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/Button';
 import { LogoStyle, IndustryType } from '@/types';
-import { STYLE_DEFINITIONS, MOCKUP_PRESETS, fileToBase64, runConcurrent } from '@/lib/presets';
+import { STYLE_DEFINITIONS, MOCKUP_PRESETS, ESSENTIALS_PRESETS, fileToBase64, runConcurrent } from '@/lib/presets';
 import {
   generateImageAction,
   generateBrandTextAction,
@@ -62,6 +62,7 @@ export function ProjectSetupWizard({
   );
   const [includeBusinessCards, setIncludeBusinessCards] = useState(true);
   const [includeSocialTemplates, setIncludeSocialTemplates] = useState(true);
+  const [selectedEssentialIds, setSelectedEssentialIds] = useState<string[]>(ESSENTIALS_PRESETS.map((e) => e.id));
   const [socialPlatform, setSocialPlatform] = useState<SocialPlatform>(SocialPlatform.INSTAGRAM);
   const [apparelColor, setApparelColor] = useState('#FFFFFF');
   const [showCustomMockupInput, setShowCustomMockupInput] = useState(false);
@@ -69,6 +70,9 @@ export function ProjectSetupWizard({
 
   const toggleMockup = (id: string) =>
     setSelectedMockupIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  const toggleEssential = (id: string) =>
+    setSelectedEssentialIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   const handleEnhance = async () => {
     if (!businessDesc) return;
@@ -201,6 +205,18 @@ export function ProjectSetupWizard({
             aspectRatio: mockup.ratio,
             type: 'mockup',
             promptLabel: `${mockup.label} (Studio)`,
+          }),
+        );
+      });
+
+      const activeEssentials = ESSENTIALS_PRESETS.filter((e) => selectedEssentialIds.includes(e.id));
+      activeEssentials.forEach((essential) => {
+        tasks.push(() =>
+          generateImageAction(projectId, `${baseMockupPrompt} ${essential.prompt} Style: Clean, minimalist, studio lighting.`, {
+            referenceImageUrl: referenceUrl,
+            aspectRatio: essential.ratio,
+            type: 'mockup',
+            promptLabel: essential.label,
           }),
         );
       });
@@ -390,6 +406,24 @@ export function ProjectSetupWizard({
                     <p className="text-xs text-stone-500 mt-0.5">Instagram, Twitter header, LinkedIn post</p>
                   </div>
                 </label>
+              </div>
+
+              <div className="bg-stone-50 p-6 rounded-2xl border border-stone-100 space-y-3">
+                <h3 className="font-bold text-sm uppercase tracking-wide text-stone-400 mb-1">Brand Essentials</h3>
+                {ESSENTIALS_PRESETS.map((essential) => (
+                  <label key={essential.id} className="flex items-start gap-3 p-3 bg-white rounded-xl border border-stone-200 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedEssentialIds.includes(essential.id)}
+                      onChange={() => toggleEssential(essential.id)}
+                      className="mt-1 w-4 h-4 accent-stone-900"
+                    />
+                    <div>
+                      <p className="font-bold text-sm text-stone-800">{essential.label}</p>
+                      <p className="text-xs text-stone-500 mt-0.5">{essential.prompt}</p>
+                    </div>
+                  </label>
+                ))}
               </div>
 
               <div className="bg-stone-50 p-6 rounded-2xl border border-stone-100">

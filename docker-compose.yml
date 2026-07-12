@@ -3,31 +3,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
     ports:
       - '3000:3000'
     environment:
-      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
-      RESEND_API_KEY: ${RESEND_API_KEY:-}
-      INVITE_FROM_EMAIL: ${INVITE_FROM_EMAIL:-}
-      STORAGE_BACKEND: ${STORAGE_BACKEND:-local}
-      LOCAL_STORAGE_DIR: /data/design
+      VELOBRAND_HOME: /data/velobrand
+      VELOBRAND_OUTPUT_DIR: /data/designs
     volumes:
-      # Persist generated brand kits (local storage backend) across restarts.
-      # Skip this and set STORAGE_BACKEND=supabase instead if you'd rather
-      # keep everything in Supabase Storage.
-      - design-data:/data/design
+      # Settings + project records
+      - velobrand-data:/data/velobrand
+      # Your generated designs. Swap the named volume for a bind mount
+      # (e.g. ./designs:/data/designs) to browse the files directly on
+      # the host — that's the folder you'd pick in Settings.
+      - velobrand-designs:/data/designs
     restart: unless-stopped
 
 volumes:
-  design-data:
-
-# This only runs the app container. Point it at Supabase's hosted free tier
-# (fastest to get started) or a self-hosted Supabase stack — see
-# https://supabase.com/docs/guides/self-hosting/docker for running Postgres,
-# Auth, and Storage locally alongside this compose file.
+  velobrand-data:
+  velobrand-designs:

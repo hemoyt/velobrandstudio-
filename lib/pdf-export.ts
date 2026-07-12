@@ -106,6 +106,9 @@ export function exportBrandKitPDF(brandIdentity: BrandIdentity, assets: Generate
         <div class="section">
           <h2>Strategy Core</h2>
           <p><strong>Tagline:</strong> &quot;${brandIdentity.tagline || ''}&quot;</p>
+          ${brandIdentity.mission ? `<p><strong>Mission:</strong> ${brandIdentity.mission}</p>` : ''}
+          ${brandIdentity.values?.length ? `<p><strong>Values:</strong> ${brandIdentity.values.join(' · ')}</p>` : ''}
+          ${brandIdentity.personality?.length ? `<p><strong>Personality:</strong> ${brandIdentity.personality.join(', ')}</p>` : ''}
           <p><strong>Brand Voice:</strong> ${brandIdentity.brandVoice || ''}</p>
           <p><strong>Target Audience:</strong> ${brandIdentity.targetAudience || ''}</p>
         </div>

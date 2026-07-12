@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireProjectRole } from '@/lib/authz';
-import { uploadGeneratedAsset } from '@/lib/storage';
-import { errorResponse, logActivity } from '@/lib/api-response';
+import { randomUUID } from 'crypto';
+import { getProject, updateProject, type StoredAsset } from '@/lib/local/store';
+import { saveDesignFile, fileUrl } from '@/lib/local/files';
+import { errorResponse } from '@/lib/api-response';
 
-// For user-uploaded assets (e.g. bringing your own logo) rather than AI-generated ones.
+// For user-provided assets (e.g. bringing your own logo) and editor saves,
+// rather than AI-generated ones.
 export async function POST(req: NextRequest) {
   try {
     const { projectId, dataUrl, type = 'logo', label } = await req.json();
@@ -11,19 +13,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'projectId and dataUrl are required' }, { status: 400 });
     }
 
-    const { supabase, user, teamId } = await requireProjectRole(projectId, 'editor');
-    const { path, signedUrl } = await uploadGeneratedAsset(supabase, teamId, projectId, dataUrl);
+    const project = await getProject(projectId);
+    const assetLabel = label ?? 'Uploaded asset';
+    const file = await saveDesignFile(project, type, assetLabel, dataUrl);
 
-    const { data: asset, error } = await supabase
-      .from('assets')
-      .insert({ project_id: projectId, storage_path: path, type, prompt: label ?? 'Uploaded asset', created_by: user.id })
-      .select()
-      .single();
-    if (error) throw error;
+    const asset: StoredAsset = {
+      id: randomUUID(),
+      type,
+      prompt: assetLabel,
+      originalPrompt: null,
+      file,
+      createdAt: new Date().toISOString(),
+    };
+    await updateProject(projectId, (p) => {
+      p.assets.push(asset);
+    });
 
-    await logActivity(supabase, { teamId, actorId: user.id, action: 'asset.uploaded', targetType: 'asset', targetId: asset.id });
-
-    return NextResponse.json({ url: signedUrl, asset });
+    return NextResponse.json({
+      url: fileUrl(file),
+      asset: { id: asset.id, type: asset.type, prompt: asset.prompt, original_prompt: null },
+    });
   } catch (err) {
     return errorResponse(err);
   }

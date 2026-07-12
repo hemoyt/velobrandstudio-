@@ -1,118 +1,171 @@
 import Link from 'next/link';
-import Image from 'next/image';
-import { Button } from '@/components/Button';
-import { createClient } from '@/lib/supabase/server';
 
-export default async function LandingPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+const STEPS = [
+  {
+    n: '01',
+    title: 'Describe the brand',
+    text: 'Write a few sentences — or paste a website and let the AI draft the brief for you.',
+  },
+  {
+    n: '02',
+    title: 'Pick a direction',
+    text: 'Choose from generated logo concepts in the style you want, or upload your own mark.',
+  },
+  {
+    n: '03',
+    title: 'Get the full kit',
+    text: 'Guidelines, mockups, business cards, social templates, and video — saved to your folder.',
+  },
+];
 
-  const primaryHref = user ? '/teams' : '/signup';
+const FEATURES = [
+  {
+    title: 'Complete brand guidelines',
+    text: 'Mission, values, voice, logo usage rules, color system, and typography — as a live page in the app and an exportable PDF.',
+  },
+  {
+    title: 'Logo concepts & variants',
+    text: 'Multiple directions per brief across eight visual styles, plus app-icon, header, and profile versions of the winner.',
+  },
+  {
+    title: 'Mockups & collateral',
+    text: 'Industry-aware mockups, business cards, letterheads, email signatures, and social templates, generated around your logo.',
+  },
+  {
+    title: 'Motion Lab',
+    text: 'Turn the logo or a prompt into cinematic video with Veo — aspect ratio, resolution, and sound included.',
+  },
+  {
+    title: 'Your keys, your costs',
+    text: 'Paste your own OpenAI or Gemini API key in Settings. No subscription, no middleman, no usage caps.',
+  },
+  {
+    title: 'Everything saved locally',
+    text: 'Every design lands in a folder you choose, organized by project — logos/, mockups/, videos/. Yours to keep.',
+  },
+];
 
+export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-stone-900 overflow-x-hidden">
-      <nav className="flex items-center justify-between px-6 py-6 md:px-12 max-w-7xl mx-auto">
-        <div className="font-serif text-2xl font-bold tracking-tight text-stone-900">VeloBrand.</div>
-        <div className="flex items-center gap-4">
+      <nav className="flex items-center justify-between px-6 py-6 md:px-12 max-w-6xl mx-auto">
+        <div className="font-serif text-2xl font-bold tracking-tight">VeloBrand.</div>
+        <div className="flex items-center gap-2">
           <a
-            href="https://github.com"
+            href="https://github.com/hemoyt/velobrandstudio-"
             target="_blank"
             rel="noreferrer"
-            className="hidden md:block text-xs font-semibold tracking-wide uppercase text-stone-400 hover:text-stone-700"
+            className="px-4 py-2 text-sm font-medium text-stone-500 hover:text-stone-900"
           >
             GitHub
           </a>
-          <Link href={primaryHref}>
-            <Button size="sm" variant="outline">
-              {user ? 'Go to teams' : 'Sign in'}
-            </Button>
+          <Link
+            href="/studio"
+            className="px-6 py-2.5 bg-stone-900 text-white rounded-full text-sm font-medium hover:bg-stone-800 transition-colors"
+          >
+            Open the studio
           </Link>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-6 md:px-12 pt-8 pb-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        <div className="space-y-8 animate-fade-in">
-          <div className="inline-block px-3 py-1 bg-stone-100 border border-stone-200 rounded-full text-xs font-semibold tracking-wide uppercase text-stone-600">
-            Open-source AI Creative Director
+      <main className="max-w-6xl mx-auto px-6 md:px-12">
+        {/* Hero */}
+        <section className="pt-16 pb-20 text-center">
+          <div className="inline-block px-4 py-1.5 bg-stone-100 border border-stone-200 rounded-full text-xs font-semibold tracking-wide uppercase text-stone-600 mb-8">
+            Open-source · Local-first · Bring your own AI keys
           </div>
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-serif font-medium leading-[1.05] tracking-tight">
-            Design your <br />
-            <span className="italic text-stone-400 font-light">brand legacy</span> <br />
-            with your team.
+          <h1 className="text-5xl md:text-7xl font-serif font-medium leading-[1.08] tracking-tight max-w-4xl mx-auto">
+            A complete <span className="italic text-stone-400 font-light">brand studio</span> that runs on your machine.
           </h1>
-          <p className="text-lg md:text-xl text-stone-600 max-w-md leading-relaxed font-light">
-            From logo concepts to full marketing kits and motion graphics. Bring your own OpenAI and
-            Gemini keys, invite your team, and self-host it anywhere.
+          <p className="mt-8 text-lg md:text-xl text-stone-600 max-w-2xl mx-auto leading-relaxed font-light">
+            From a one-paragraph brief to logos, full brand guidelines, mockups, and motion — install it, paste your
+            API key, and every design is saved to a folder you choose.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Link href={primaryHref}>
-              <Button size="lg" className="rounded-full px-10">
-                {user ? 'Go to teams' : 'Start free'}
-              </Button>
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/studio"
+              className="px-10 py-4 bg-stone-900 text-white rounded-full text-base font-medium hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200"
+            >
+              Start creating — it&apos;s free
             </Link>
-            <a href="https://github.com" target="_blank" rel="noreferrer">
-              <Button size="lg" variant="ghost" className="rounded-full">
-                View on GitHub
-              </Button>
+            <a
+              href="https://github.com/hemoyt/velobrandstudio-"
+              target="_blank"
+              rel="noreferrer"
+              className="px-10 py-4 border border-stone-300 rounded-full text-base font-medium text-stone-600 hover:border-stone-900 hover:text-stone-900 transition-colors"
+            >
+              View on GitHub
             </a>
           </div>
+        </section>
 
-          <div className="pt-12 grid grid-cols-3 gap-8 border-t border-stone-200/60">
-            <div>
-              <div className="text-3xl font-serif text-stone-300">01</div>
-              <div className="text-sm font-bold mt-2 uppercase tracking-wide">Brief</div>
+        {/* Product shot */}
+        <section className="pb-24">
+          <div className="rounded-3xl border border-stone-200 shadow-2xl shadow-stone-200/60 overflow-hidden bg-white">
+            <div className="flex items-center gap-1.5 px-5 py-3.5 border-b border-stone-100 bg-stone-50">
+              <span className="w-3 h-3 rounded-full bg-stone-200" />
+              <span className="w-3 h-3 rounded-full bg-stone-200" />
+              <span className="w-3 h-3 rounded-full bg-stone-200" />
             </div>
-            <div>
-              <div className="text-3xl font-serif text-stone-300">02</div>
-              <div className="text-sm font-bold mt-2 uppercase tracking-wide">Curate</div>
-            </div>
-            <div>
-              <div className="text-3xl font-serif text-stone-300">03</div>
-              <div className="text-sm font-bold mt-2 uppercase tracking-wide">Launch</div>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/screenshots/dashboard.jpg" alt="VeloBrand Studio dashboard" className="w-full" />
           </div>
-        </div>
+        </section>
 
-        <div className="relative h-[600px] w-full hidden lg:block">
-          <div className="absolute top-0 right-0 w-4/5 h-4/5 bg-stone-200 rounded-tl-[120px] rounded-br-[40px] overflow-hidden shadow-inner">
-            <Image
-              src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop"
-              alt="Mood board"
-              fill
-              className="object-cover opacity-60 mix-blend-multiply"
-              sizes="(min-width: 1024px) 40vw, 0px"
-              priority
-            />
+        {/* How it works */}
+        <section className="pb-24">
+          <h2 className="text-3xl md:text-4xl font-serif font-medium text-center mb-16">
+            Brief to brand in three steps
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {STEPS.map((step) => (
+              <div key={step.n} className="bg-white rounded-3xl border border-stone-200 p-10">
+                <div className="text-4xl font-serif text-stone-200 mb-6">{step.n}</div>
+                <h3 className="text-lg font-bold mb-3">{step.title}</h3>
+                <p className="text-sm text-stone-500 leading-relaxed">{step.text}</p>
+              </div>
+            ))}
           </div>
+        </section>
 
-          <div className="absolute bottom-20 left-10 w-2/3 bg-white p-8 shadow-2xl rounded-tr-[40px] rounded-bl-[40px] flex flex-col justify-between border border-stone-100 backdrop-blur-sm bg-white/90">
-            <div className="flex justify-between items-start mb-8">
-              <div className="w-12 h-12 bg-stone-900 rounded-full flex items-center justify-center text-white font-serif italic text-xl">
-                V
+        {/* Features */}
+        <section className="pb-24">
+          <h2 className="text-3xl md:text-4xl font-serif font-medium text-center mb-16">
+            Everything a brand launch needs
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {FEATURES.map((f) => (
+              <div key={f.title} className="p-8 rounded-2xl border border-stone-200 bg-white hover:shadow-lg transition-shadow">
+                <h3 className="font-bold mb-2.5">{f.title}</h3>
+                <p className="text-sm text-stone-500 leading-relaxed">{f.text}</p>
               </div>
-              <div className="space-y-2">
-                <div className="w-24 h-1.5 bg-stone-200 rounded-full"></div>
-                <div className="w-16 h-1.5 bg-stone-200 rounded-full ml-auto"></div>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="flex gap-2">
-                <div className="h-16 w-1/3 bg-[#D4C4B7] rounded-lg"></div>
-                <div className="h-16 w-1/3 bg-[#8B7E74] rounded-lg"></div>
-                <div className="h-16 w-1/3 bg-[#4A403A] rounded-lg"></div>
-              </div>
-              <div className="flex gap-2 items-center pt-2">
-                <div className="h-1.5 w-full bg-stone-100 rounded-full"></div>
-                <div className="h-1.5 w-1/2 bg-stone-100 rounded-full"></div>
-              </div>
-            </div>
+            ))}
           </div>
+        </section>
 
-          <div className="absolute top-10 left-20 w-16 h-16 border-4 border-stone-900 rounded-full opacity-10"></div>
-        </div>
+        {/* Bottom CTA */}
+        <section className="pb-24">
+          <div className="bg-stone-900 rounded-[2.5rem] px-8 py-20 text-center text-white">
+            <h2 className="text-3xl md:text-5xl font-serif font-medium mb-6">
+              Install it. Add your key. <span className="italic text-stone-400">Build the brand.</span>
+            </h2>
+            <p className="text-stone-400 max-w-xl mx-auto mb-10">
+              <code className="text-stone-300">npm install && npm run dev</code> — that&apos;s the whole setup. No
+              database, no account, no cloud.
+            </p>
+            <Link
+              href="/studio"
+              className="inline-block px-10 py-4 bg-white text-stone-900 rounded-full text-base font-medium hover:bg-stone-100 transition-colors"
+            >
+              Open the studio
+            </Link>
+          </div>
+        </section>
       </main>
+
+      <footer className="border-t border-stone-200 py-10 text-center text-xs text-stone-400">
+        VeloBrand Studio — open-source under the MIT license.
+      </footer>
     </div>
   );
 }

@@ -18,12 +18,10 @@ out/
 next-env.d.ts
 *.tsbuildinfo
 
-# Supabase CLI local state
-supabase/.branches
-supabase/.temp
-
-# Local storage backend output (generated brand kits when running locally)
+# Local studio data (if VELOBRAND_HOME / the designs folder point into the repo)
 /design
+/designs
+/.velobrand
 
 # Editor directories and files
 .vscode/*

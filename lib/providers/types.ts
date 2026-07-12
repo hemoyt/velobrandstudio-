@@ -1,5 +1,6 @@
 import type { BrandIdentity } from '@/types';
-import type { AiProvider } from '@/lib/supabase/database.types';
+
+export type AiProvider = 'openai' | 'gemini';
 
 export class AIProviderError extends Error {
   status: number;

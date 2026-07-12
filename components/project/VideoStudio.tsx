@@ -7,12 +7,10 @@ import { generateVideoAction, optimizeVideoPromptAction } from '@/lib/ai-client'
 import type { GeneratedVideo } from '@/types';
 
 export function VideoStudio({
-  teamId,
   projectId,
   logoUrl,
   initialVideos,
 }: {
-  teamId: string;
   projectId: string;
   logoUrl: string | null;
   initialVideos: GeneratedVideo[];
@@ -62,7 +60,7 @@ export function VideoStudio({
     <div className="flex h-screen bg-stone-950 text-stone-300 overflow-hidden font-sans">
       <div className="w-96 flex flex-col border-r border-stone-800 bg-stone-900/50 backdrop-blur-sm z-20">
         <div className="p-6 border-b border-stone-800">
-          <Link href={`/teams/${teamId}/projects/${projectId}`} className="flex items-center gap-2 text-xs font-bold text-stone-500 hover:text-white transition-colors mb-6 uppercase tracking-widest">
+          <Link href={`/studio/${projectId}`} className="flex items-center gap-2 text-xs font-bold text-stone-500 hover:text-white transition-colors mb-6 uppercase tracking-widest">
             ← Exit Studio
           </Link>
           <h2 className="font-serif text-3xl font-bold text-white">Motion Lab</h2>
@@ -141,8 +139,7 @@ export function VideoStudio({
             Render Sequence
           </Button>
           <p className="text-[10px] text-stone-600 mt-3 text-center">
-            Video generation can take a few minutes. On Vercel this needs a plan with an extended function duration —
-            self-hosting with <code>next start</code> has no such limit.
+            Video generation can take a few minutes. The finished MP4 is saved straight into your designs folder.
           </p>
         </div>
       </div>

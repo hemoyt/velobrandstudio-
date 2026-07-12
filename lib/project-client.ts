@@ -1,5 +1,7 @@
 'use client';
 
+import type { BrandIdentity } from '@/types';
+
 async function request<T>(url: string, method: string, body?: unknown): Promise<T> {
   const res = await fetch(url, {
     method,
@@ -26,3 +28,9 @@ export const updateProject = (
 ) => request<{ project: unknown }>(`/api/projects/${projectId}`, 'PATCH', update);
 
 export const deleteProject = (projectId: string) => request<{ ok: true }>(`/api/projects/${projectId}`, 'DELETE');
+
+export const duplicateProject = (projectId: string) =>
+  request<{ project: { id: string } }>(`/api/projects/${projectId}/duplicate`, 'POST');
+
+export const updateIdentity = (projectId: string, update: Partial<BrandIdentity>) =>
+  request<{ brandIdentity: BrandIdentity }>(`/api/projects/${projectId}/identity`, 'PATCH', update);

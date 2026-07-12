@@ -21,13 +21,26 @@ async function putSettings(body: Record<string, unknown>): Promise<SettingsData>
   return data as SettingsData;
 }
 
+async function verifyKey(provider: 'openai' | 'gemini', key?: string): Promise<{ ok: boolean; error?: string }> {
+  const res = await fetch('/api/settings/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ provider, key }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) return { ok: false, error: data.error || 'Verification failed' };
+  return data as { ok: boolean; error?: string };
+}
+
 function KeyField({
+  provider,
   label,
   help,
   hint,
   onSave,
   onClear,
 }: {
+  provider: 'openai' | 'gemini';
   label: string;
   help: string;
   hint: string | null;
@@ -37,6 +50,8 @@ function KeyField({
   const [value, setValue] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [testBusy, setTestBusy] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; error?: string } | null>(null);
 
   const save = async () => {
     if (!value.trim()) return;
@@ -45,10 +60,21 @@ function KeyField({
     try {
       await onSave(value.trim());
       setValue('');
+      setTestResult(null);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save');
     } finally {
       setBusy(false);
+    }
+  };
+
+  const test = async () => {
+    setTestBusy(true);
+    setTestResult(null);
+    try {
+      setTestResult(await verifyKey(provider, value.trim() || undefined));
+    } finally {
+      setTestBusy(false);
     }
   };
 
@@ -72,14 +98,25 @@ function KeyField({
         <input
           type="password"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => {
+            setValue(e.target.value);
+            setTestResult(null);
+          }}
           placeholder={hint ? 'Paste a new key to replace it' : 'Paste your API key'}
           className="flex-1 px-4 py-2.5 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-stone-900"
         />
+        <Button size="sm" variant="outline" onClick={test} isLoading={testBusy} disabled={!value.trim() && !hint}>
+          Test
+        </Button>
         <Button size="sm" onClick={save} isLoading={busy} disabled={!value.trim()}>
           Save
         </Button>
       </div>
+      {testResult && (
+        <p className={`text-sm mt-3 ${testResult.ok ? 'text-green-700' : 'text-red-600'}`}>
+          {testResult.ok ? '✓ Key works.' : `✕ ${testResult.error}`}
+        </p>
+      )}
       {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
     </div>
   );
@@ -119,6 +156,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
         </p>
         <div className="space-y-4">
           <KeyField
+            provider="openai"
             label="OpenAI API key"
             help="Used for image generation and editing (GPT Image 2). Get one at platform.openai.com."
             hint={settings.openaiKeyHint}
@@ -126,6 +164,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
             onClear={async () => setSettings(await putSettings({ openaiApiKey: null }))}
           />
           <KeyField
+            provider="gemini"
             label="Gemini API key"
             help="Used for brand strategy text, prompt helpers, and video generation with Veo. Get one at aistudio.google.com."
             hint={settings.geminiKeyHint}

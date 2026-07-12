@@ -1,4 +1,5 @@
 import type { BrandIdentity } from '@/types';
+import type { RegenerableField } from './brand-prompt';
 
 export type AiProvider = 'openai' | 'gemini';
 
@@ -41,6 +42,8 @@ export interface AIProvider {
   generateImage?(params: ImageGenParams): Promise<string>;
   editImage?(params: ImageEditParams): Promise<string>;
   generateBrandText?(description: string): Promise<BrandIdentity>;
+  /** Regenerates a single identity field, returning just that field's new value. */
+  regenerateIdentityField?(field: RegenerableField, description: string, identity: BrandIdentity): Promise<unknown>;
   optimizeLogoPrompt?(description: string, style?: string): Promise<string>;
   enhanceDescription?(description: string): Promise<string>;
   optimizeVideoPrompt?(prompt: string): Promise<string>;

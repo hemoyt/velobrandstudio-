@@ -183,6 +183,39 @@ export async function createProject(name: string, industry: string): Promise<Sto
   return project;
 }
 
+/**
+ * Spins off a new project pre-filled with an existing one's brief, industry,
+ * and brand identity — a starting point for a sibling brand, e.g. a second
+ * product line or a rebrand direction to try. Does not copy design files:
+ * those are the previous brand's actual output, not a template.
+ */
+export async function duplicateProject(id: string): Promise<StoredProject> {
+  const source = await getProject(id);
+  const now = new Date().toISOString();
+  const existing = await listProjects();
+  const baseName = `${source.name} (copy)`;
+  let folder = slugify(baseName) || 'project';
+  if (existing.some((p) => p.folder === folder)) folder = `${folder}-${randomSuffix()}`;
+
+  const project: StoredProject = {
+    id: randomUUID(),
+    name: baseName,
+    industry: source.industry,
+    brief: source.brief,
+    status: 'DRAFT',
+    folder,
+    brandIdentity: source.brandIdentity,
+    selectedLogoAssetId: null,
+    assets: [],
+    videos: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+  await mkdir(PROJECTS_DIR, { recursive: true });
+  await writeFile(projectFile(project.id), JSON.stringify(project, null, 2));
+  return project;
+}
+
 export async function deleteProject(id: string): Promise<void> {
   // Only removes the project record. Generated files stay in the user's
   // designs folder — they're the user's work, not ours to delete.

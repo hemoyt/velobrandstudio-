@@ -2,7 +2,7 @@ import OpenAI, { toFile } from 'openai';
 import type { BrandIdentity } from '@/types';
 import type { AIProvider, ImageEditParams, ImageGenParams } from './types';
 import { AIProviderError } from './types';
-import { brandIdentityInstruction } from './brand-prompt';
+import { brandIdentityInstruction, regenerateFieldInstruction, type RegenerableField } from './brand-prompt';
 
 const IMAGE_MODEL = 'gpt-image-2';
 const TEXT_MODEL = 'gpt-4o-mini';
@@ -83,6 +83,11 @@ export function createOpenAIProvider(apiKey: string): AIProvider {
       return JSON.parse(text) as BrandIdentity;
     },
 
+    async regenerateIdentityField(field: RegenerableField, description: string, identity: BrandIdentity): Promise<unknown> {
+      const text = await complete(client, regenerateFieldInstruction(field, description, identity), true);
+      return JSON.parse(text).value;
+    },
+
     async optimizeLogoPrompt(description: string, style?: string): Promise<string> {
       return complete(
         client,
@@ -128,6 +133,12 @@ async function complete(client: OpenAI, prompt: string, json = false): Promise<s
     const message = err instanceof Error ? err.message : 'Unknown OpenAI error';
     throw new AIProviderError(`OpenAI text generation failed: ${message}`, 502);
   }
+}
+
+/** Lightweight live check that an OpenAI key actually works. Throws on failure. */
+export async function verifyOpenAIKey(apiKey: string): Promise<void> {
+  const client = new OpenAI({ apiKey });
+  await client.models.list();
 }
 
 function wrapOpenAIError(err: unknown): AIProviderError {

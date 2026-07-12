@@ -40,11 +40,13 @@ Open [http://localhost:3000](http://localhost:3000), go to **Settings**, paste y
 
 1. **Brief** — write a description, import it from an existing website, or upload your own logo. AI-enhance the wording if you want.
 2. **Logo concepts** — four directions per run across eight styles (minimalist, vintage, luxury, abstract, mascot, hand-drawn, cyberpunk, 3D), plus app-icon / website-header / profile variants of the winner.
-3. **Brand identity** — mission, values, personality, tagline, voice, target audience, a color palette with usage weighting, and a Google Fonts pairing.
-4. **Brand guidelines** — a live page in the app (and a printable PDF) with logo clear-space and minimum-size rules, do's and don'ts, the color system with hex/RGB, and typography samples.
+3. **Brand identity** — mission, values, personality, tagline, voice, target audience, elevator pitch, per-platform social bios, sample captions, imagery direction, a color palette with usage weighting, and a Google Fonts pairing. Every field is editable inline or regenerable individually with AI — nothing is locked to the first draft.
+4. **Brand guidelines** — a live, editable page in the app (and a printable PDF) with logo clear-space and minimum-size rules, do's and don'ts, quick logo iteration (bolder, rounder, more minimal, different color), the color system with hex/RGB and a WCAG contrast badge per swatch, and real Google Fonts rendering with a font picker.
 5. **Collateral** — industry-aware mockups (tech, fashion, retail, hospitality, coffee, general), business cards, letterhead, email signature, presentation cover, favicon set, and social templates — generated concurrently around your chosen logo.
 6. **Motion** — text- or logo-to-video with aspect ratio, resolution, and sound controls.
 7. **In-browser editor** — logo placement, text layers, undo history, AI smart-erase and freeform edits on any asset.
+8. **Full-kit ZIP export** — every generated file plus a self-contained, offline-viewable brand-guidelines.html and the raw brand-identity.json, in one download.
+9. **Duplicate a project** — spin off a sibling brand from an existing brief and identity as a starting point, without touching the original's files.
 
 ## How it stores your work
 
@@ -89,6 +91,7 @@ Settings and designs persist in named volumes; swap the `velobrand-designs` volu
 - **Website import** fetches the URL you paste from your machine, with localhost/private-IP ranges blocked as an accident guardrail.
 - **Video takes minutes** — that's Veo rendering, not the app hanging. The MP4 lands in your designs folder when done.
 - **No job queue** — generation runs in-request, which is fine for one person; keep the tab open during a big kit build.
+- **Test your key before you generate** — the Settings page has a "Test" button next to each key field that makes one minimal live call to the provider, so a bad key fails fast instead of mid-kit.
 
 ## Contributing
 

@@ -26,6 +26,13 @@ const LOGO_ANGLES = [
   'a self-contained Emblem or Badge layout. Unified structure',
 ];
 
+const LOGO_ITERATIONS: { id: string; label: string; suffix: string }[] = [
+  { id: 'bolder', label: 'Bolder', suffix: 'bolder, thicker strokes, higher contrast, more confident weight' },
+  { id: 'rounder', label: 'Rounder', suffix: 'softer, with rounded corners and curves instead of sharp angles' },
+  { id: 'minimal', label: 'More minimal', suffix: 'simplified further, fewer details, more negative space, reductionist' },
+  { id: 'color', label: 'Different color', suffix: 'reimagined using a different color combination' },
+];
+
 export function ProjectSetupWizard({
   projectId,
   industry,
@@ -162,6 +169,27 @@ export function ProjectSetupWizard({
     setSelectedLogo(logo);
     await updateProject(projectId, { selectedLogoAssetId: logo.asset.id });
     setStep('package');
+  };
+
+  const [isIterating, setIsIterating] = useState<string | null>(null);
+
+  const handleIterateLogo = async (id: string, suffix: string) => {
+    if (!selectedLogo) return;
+    setIsIterating(id);
+    setError(null);
+    try {
+      const result = await generateImageAction(
+        projectId,
+        `Logo Design: ${optimizedPrompt || businessDesc}, ${suffix}. Keep the same core concept. Isolated on a white background, no photorealism, professional vector art style, centered composition.`,
+        { referenceImageUrl: selectedLogo.url, aspectRatio: '1:1', type: 'logo', promptLabel: `Logo Variant (${id})` },
+      );
+      setSelectedLogo(result);
+      await updateProject(projectId, { selectedLogoAssetId: result.asset.id });
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate variant');
+    } finally {
+      setIsIterating(null);
+    }
   };
 
   const handleGenerateFinalAssets = async () => {
@@ -490,6 +518,20 @@ export function ProjectSetupWizard({
                 <div className="text-stone-400 text-sm">No logo selected</div>
               )}
             </div>
+            {selectedLogo && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {LOGO_ITERATIONS.map((it) => (
+                  <button
+                    key={it.id}
+                    onClick={() => handleIterateLogo(it.id, it.suffix)}
+                    disabled={isIterating !== null}
+                    className="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 rounded-full text-[10px] font-bold text-stone-600 disabled:opacity-40"
+                  >
+                    {isIterating === it.id ? 'Generating…' : it.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { StudioNav } from '@/components/StudioNav';
 import { Button } from '@/components/Button';
 import { ImageEditor } from '@/components/ImageEditor';
 import { exportBrandKitPDF } from '@/lib/pdf-export';
 import { generateImageAction, uploadAssetAction } from '@/lib/ai-client';
+import { duplicateProject } from '@/lib/project-client';
 import type { BrandIdentity, GeneratedImage } from '@/types';
 
 export function ProjectDashboard({
@@ -28,13 +30,26 @@ export function ProjectDashboard({
   videoCount: number;
   folderPath: string;
 }) {
+  const router = useRouter();
   const [assets, setAssets] = useState(initialAssets);
   const [editingAsset, setEditingAsset] = useState<GeneratedImage | null>(null);
   const [customPrompt, setCustomPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const logoUrl = assets.find((a) => a.id === selectedLogoAssetId)?.url;
+
+  const handleDuplicate = async () => {
+    setIsDuplicating(true);
+    try {
+      const { project } = await duplicateProject(projectId);
+      router.push(`/studio/${project.id}/setup`);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to duplicate project');
+      setIsDuplicating(false);
+    }
+  };
 
   const handleExportPDF = () => {
     if (brandIdentity) exportBrandKitPDF(brandIdentity, assets);
@@ -116,6 +131,14 @@ export function ProjectDashboard({
             </Link>
             <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={!brandIdentity}>
               Export PDF
+            </Button>
+            <a href={`/api/projects/${projectId}/export-zip`} download>
+              <Button variant="outline" size="sm">
+                Download Full Kit
+              </Button>
+            </a>
+            <Button variant="outline" size="sm" onClick={handleDuplicate} isLoading={isDuplicating} title="Use this brief and identity as a starting point for a new brand">
+              Duplicate
             </Button>
           </div>
         </header>

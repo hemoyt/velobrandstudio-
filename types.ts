@@ -25,6 +25,12 @@ export interface BrandIdentity {
   brandVoice: string;
   tagline: string;
   targetAudience: string;
+  /** One-sentence brand mission. Optional: older saved projects predate it. */
+  mission?: string;
+  /** 3-5 core brand values. */
+  values?: string[];
+  /** 3-4 personality adjectives (e.g. "warm", "precise"). */
+  personality?: string[];
 }
 
 export enum ImageSize {

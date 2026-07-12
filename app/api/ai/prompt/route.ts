@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireProjectRole } from '@/lib/authz';
-import { getGeminiProvider } from '@/lib/providers/resolve';
+import { getTextProvider } from '@/lib/providers/resolve';
 import { AIProviderError } from '@/lib/providers/types';
 import { errorResponse } from '@/lib/api-response';
 
@@ -10,18 +9,16 @@ type PromptKind = 'optimize-logo-prompt' | 'enhance-description' | 'optimize-vid
 
 export async function POST(req: NextRequest) {
   try {
-    const { projectId, kind, text, style } = (await req.json()) as {
-      projectId?: string;
+    const { kind, text, style } = (await req.json()) as {
       kind?: PromptKind;
       text?: string;
       style?: string;
     };
-    if (!projectId || !kind || !text) {
-      return NextResponse.json({ error: 'projectId, kind, and text are required' }, { status: 400 });
+    if (!kind || !text) {
+      return NextResponse.json({ error: 'kind and text are required' }, { status: 400 });
     }
 
-    const { teamId } = await requireProjectRole(projectId, 'editor');
-    const provider = await getGeminiProvider(teamId);
+    const provider = await getTextProvider();
 
     let result: string;
     switch (kind) {

@@ -10,13 +10,8 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Public env vars must be present at build time since Next.js inlines them
-# into the client bundle. Server-only secrets (SUPABASE_SERVICE_ROLE_KEY,
-# ENCRYPTION_KEY, provider keys) are NOT needed at build time.
-ARG NEXT_PUBLIC_SUPABASE_URL
-ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
-ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+# No build-time secrets needed: API keys are added in the app's Settings
+# page at runtime and stored under VELOBRAND_HOME.
 RUN npm run build
 
 FROM base AS runner

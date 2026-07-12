@@ -2,6 +2,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import type { BrandIdentity } from '@/types';
 import type { AIProvider, ImageEditParams, ImageGenParams, VideoGenParams } from './types';
 import { AIProviderError } from './types';
+import { brandIdentityInstruction } from './brand-prompt';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -66,11 +67,9 @@ export function createGeminiProvider(apiKey: string): AIProvider {
     },
 
     async generateBrandText(description: string): Promise<BrandIdentity> {
-      const prompt = `Generate a brand identity for: ${description}. Return JSON.`;
-
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: prompt,
+        contents: brandIdentityInstruction(description),
         config: {
           responseMimeType: 'application/json',
           responseSchema: {
@@ -78,6 +77,9 @@ export function createGeminiProvider(apiKey: string): AIProvider {
             properties: {
               businessName: { type: Type.STRING },
               description: { type: Type.STRING },
+              mission: { type: Type.STRING },
+              values: { type: Type.ARRAY, items: { type: Type.STRING } },
+              personality: { type: Type.ARRAY, items: { type: Type.STRING } },
               colorPalette: { type: Type.ARRAY, items: { type: Type.STRING } },
               typography: {
                 type: Type.OBJECT,

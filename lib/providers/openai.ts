@@ -1,8 +1,11 @@
 import OpenAI, { toFile } from 'openai';
+import type { BrandIdentity } from '@/types';
 import type { AIProvider, ImageEditParams, ImageGenParams } from './types';
 import { AIProviderError } from './types';
+import { brandIdentityInstruction } from './brand-prompt';
 
 const IMAGE_MODEL = 'gpt-image-2';
+const TEXT_MODEL = 'gpt-4o-mini';
 
 function dataUrlToBuffer(dataUrl: string): { buffer: Buffer; mimeType: string } {
   const match = dataUrl.match(/^data:(.+);base64,(.+)$/);
@@ -71,7 +74,60 @@ export function createOpenAIProvider(apiKey: string): AIProvider {
         throw wrapOpenAIError(err);
       }
     },
+
+    // Text capabilities exist here as a fallback so the studio works
+    // end-to-end with only an OpenAI key (Gemini is preferred for text).
+
+    async generateBrandText(description: string): Promise<BrandIdentity> {
+      const text = await complete(client, brandIdentityInstruction(description), true);
+      return JSON.parse(text) as BrandIdentity;
+    },
+
+    async optimizeLogoPrompt(description: string, style?: string): Promise<string> {
+      return complete(
+        client,
+        `Optimize this business description into a concise logo design prompt${style ? ` in the style: ${style}` : ''}. Return only the prompt string, nothing else.\n\n${description}`,
+      );
+    },
+
+    async enhanceDescription(description: string): Promise<string> {
+      return complete(
+        client,
+        `Rewrite this business description to be more descriptive and marketing-oriented. Return only the rewritten description.\n\n${description}`,
+      );
+    },
+
+    async optimizeVideoPrompt(prompt: string): Promise<string> {
+      return complete(
+        client,
+        `Enhance this video generation prompt to be cinematic and detailed (camera movement, lighting, mood). Return only the enhanced prompt.\n\n${prompt}`,
+      );
+    },
+
+    async describeFromWebsite({ title, text, url }): Promise<string> {
+      return complete(
+        client,
+        `Based on the following website content, write a concise (2-4 sentence) standalone business description covering what the business does, its vibe/positioning, and target audience.\n\nURL: ${url}\nTitle: ${title}\nContent: ${text}`,
+      );
+    },
   };
+}
+
+async function complete(client: OpenAI, prompt: string, json = false): Promise<string> {
+  try {
+    const response = await client.chat.completions.create({
+      model: TEXT_MODEL,
+      messages: [{ role: 'user', content: prompt }],
+      ...(json ? { response_format: { type: 'json_object' as const } } : {}),
+    });
+    const text = response.choices[0]?.message?.content;
+    if (!text) throw new AIProviderError('OpenAI returned no text');
+    return text;
+  } catch (err) {
+    if (err instanceof AIProviderError) throw err;
+    const message = err instanceof Error ? err.message : 'Unknown OpenAI error';
+    throw new AIProviderError(`OpenAI text generation failed: ${message}`, 502);
+  }
 }
 
 function wrapOpenAIError(err: unknown): AIProviderError {

@@ -27,12 +27,10 @@ const LOGO_ANGLES = [
 ];
 
 export function ProjectSetupWizard({
-  teamId,
   projectId,
   industry,
   initialBrief,
 }: {
-  teamId: string;
   projectId: string;
   industry: IndustryType;
   initialBrief: string;
@@ -308,7 +306,7 @@ export function ProjectSetupWizard({
       await runConcurrent(tasks, 3, () => setProgress((p) => ({ ...p, done: p.done + 1 })));
       await updateProject(projectId, { status: 'IN_REVIEW' });
 
-      router.push(`/teams/${teamId}/projects/${projectId}`);
+      router.push(`/studio/${projectId}`);
       router.refresh();
     } catch (err: any) {
       setError(err.message || 'Failed to generate the brand kit');

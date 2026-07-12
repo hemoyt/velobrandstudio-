@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireProjectRole } from '@/lib/authz';
-import { getGeminiProvider } from '@/lib/providers/resolve';
+import { getTextProvider } from '@/lib/providers/resolve';
 import { AIProviderError } from '@/lib/providers/types';
 import { errorResponse } from '@/lib/api-response';
 import { fetchWebsiteText } from '@/lib/website-import';
@@ -9,17 +8,14 @@ export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
   try {
-    const { projectId, url } = await req.json();
-    if (!projectId || !url) {
-      return NextResponse.json({ error: 'projectId and url are required' }, { status: 400 });
+    const { url } = await req.json();
+    if (!url) {
+      return NextResponse.json({ error: 'url is required' }, { status: 400 });
     }
 
-    // Requiring editor+ access here is also what keeps this fetch endpoint
-    // from being an open SSRF proxy for anyone who isn't already a
-    // trusted team member — see lib/website-import.ts for the rest of the
-    // guardrails.
-    const { teamId } = await requireProjectRole(projectId, 'editor');
-
+    // This is a single-user local tool, so the fetch runs with the same
+    // network access the user already has. lib/website-import.ts still
+    // blocks localhost/private ranges as a guardrail against accidents.
     let title = '';
     let text = '';
     try {
@@ -31,7 +27,7 @@ export async function POST(req: NextRequest) {
       throw new AIProviderError('Could not extract readable content from that page', 422);
     }
 
-    const provider = await getGeminiProvider(teamId);
+    const provider = await getTextProvider();
     if (!provider.describeFromWebsite) {
       throw new AIProviderError('Website import is unavailable', 422);
     }

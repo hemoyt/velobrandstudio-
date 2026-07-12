@@ -11,8 +11,8 @@ async function request<T>(url: string, method: string, body?: unknown): Promise<
   return data as T;
 }
 
-export const createProject = (teamId: string, clientName: string, industry: string) =>
-  request<{ project: { id: string } }>(`/api/teams/${teamId}/projects`, 'POST', { clientName, industry });
+export const createProject = (name: string, industry: string) =>
+  request<{ project: { id: string } }>('/api/projects', 'POST', { name, industry });
 
 export const updateProject = (
   projectId: string,
@@ -26,8 +26,3 @@ export const updateProject = (
 ) => request<{ project: unknown }>(`/api/projects/${projectId}`, 'PATCH', update);
 
 export const deleteProject = (projectId: string) => request<{ ok: true }>(`/api/projects/${projectId}`, 'DELETE');
-
-export const enableShareLink = (projectId: string) =>
-  request<{ shareUrl: string }>(`/api/projects/${projectId}/share`, 'POST');
-
-export const disableShareLink = (projectId: string) => request<{ ok: true }>(`/api/projects/${projectId}/share`, 'DELETE');

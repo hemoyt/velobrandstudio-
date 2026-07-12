@@ -1,16 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readDesignFile } from '@/lib/local/files';
-
-const MIME_BY_EXT: Record<string, string> = {
-  png: 'image/png',
-  jpg: 'image/jpeg',
-  jpeg: 'image/jpeg',
-  webp: 'image/webp',
-  gif: 'image/gif',
-  svg: 'image/svg+xml',
-  mp4: 'video/mp4',
-  webm: 'video/webm',
-};
+import { readDesignFile, mimeTypeFor } from '@/lib/local/files';
 
 // Serves files from the user's designs folder. This is a single-user local
 // tool with no auth — the only hard requirement is that a crafted URL can
@@ -29,10 +18,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ pat
 
   try {
     const buffer = await readDesignFile(relativePath);
-    const ext = relativePath.split('.').pop()?.toLowerCase() ?? '';
-    const contentType = MIME_BY_EXT[ext] ?? 'application/octet-stream';
     return new NextResponse(new Uint8Array(buffer), {
-      headers: { 'Content-Type': contentType, 'Cache-Control': 'private, max-age=3600' },
+      headers: { 'Content-Type': mimeTypeFor(relativePath), 'Cache-Control': 'private, max-age=3600' },
     });
   } catch {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });

@@ -67,6 +67,9 @@ export const optimizeVideoPromptAction = (projectId: string, prompt: string): Pr
     (r) => r.text,
   );
 
+export const regenerateFieldAction = (projectId: string, field: string): Promise<{ field: string; value: unknown; brandIdentity: BrandIdentity }> =>
+  postJSON('/api/ai/regenerate-field', { projectId, field });
+
 export const generateVideoAction = (
   projectId: string,
   prompt: string,

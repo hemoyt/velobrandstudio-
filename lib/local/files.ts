@@ -14,6 +14,22 @@ const SUBDIR_BY_TYPE: Record<string, string> = {
   video: 'videos',
 };
 
+const MIME_BY_EXT: Record<string, string> = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+  gif: 'image/gif',
+  svg: 'image/svg+xml',
+  mp4: 'video/mp4',
+  webm: 'video/webm',
+};
+
+export function mimeTypeFor(relativePath: string): string {
+  const ext = relativePath.split('.').pop()?.toLowerCase() ?? '';
+  return MIME_BY_EXT[ext] ?? 'application/octet-stream';
+}
+
 function dataUrlToBuffer(dataUrl: string): { buffer: Buffer; extension: string } {
   const match = dataUrl.match(/^data:(.+);base64,(.+)$/);
   if (!match) throw new Error('Expected a base64 data URL');

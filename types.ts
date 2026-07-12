@@ -31,6 +31,18 @@ export interface BrandIdentity {
   values?: string[];
   /** 3-4 personality adjectives (e.g. "warm", "precise"). */
   personality?: string[];
+  /** A 1-2 sentence pitch you could say out loud in an elevator. */
+  elevatorPitch?: string;
+  /** Ready-to-paste bios sized for each platform's limit. */
+  socialBios?: {
+    instagram?: string;
+    twitter?: string;
+    linkedin?: string;
+  };
+  /** 2-3 example social captions written in the brand voice. */
+  sampleCaptions?: string[];
+  /** Photography/imagery direction: lighting, mood, composition. */
+  imageryStyle?: string;
 }
 
 export enum ImageSize {

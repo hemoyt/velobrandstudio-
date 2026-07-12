@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { deleteProject } from '@/lib/project-client';
+import { useRouter } from 'next/navigation';
+import { deleteProject, duplicateProject } from '@/lib/project-client';
 
 export interface ProjectCard {
   id: string;
@@ -22,7 +23,9 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function ProjectsGrid({ initialProjects }: { initialProjects: ProjectCard[] }) {
+  const router = useRouter();
   const [projects, setProjects] = useState(initialProjects);
+  const [duplicating, setDuplicating] = useState<string | null>(null);
 
   const handleDelete = async (e: React.MouseEvent, project: ProjectCard) => {
     e.preventDefault();
@@ -33,6 +36,19 @@ export function ProjectsGrid({ initialProjects }: { initialProjects: ProjectCard
       setProjects((prev) => prev.filter((p) => p.id !== project.id));
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleDuplicate = async (e: React.MouseEvent, project: ProjectCard) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDuplicating(project.id);
+    try {
+      const { project: copy } = await duplicateProject(project.id);
+      router.push(`/studio/${copy.id}/setup`);
+    } catch (err) {
+      console.error(err);
+      setDuplicating(null);
     }
   };
 
@@ -83,12 +99,19 @@ export function ProjectsGrid({ initialProjects }: { initialProjects: ProjectCard
             <span className="text-xs text-stone-500 font-medium">
               {project.assetCount} asset{project.assetCount === 1 ? '' : 's'}
             </span>
-            <button
-              onClick={(e) => handleDelete(e, project)}
-              className="text-[11px] text-stone-300 hover:text-red-500 font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              Remove
-            </button>
+            <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={(e) => handleDuplicate(e, project)}
+                disabled={duplicating === project.id}
+                className="text-[11px] text-stone-400 hover:text-stone-900 font-semibold disabled:opacity-40"
+                title="Use as a starting point for a new brand"
+              >
+                {duplicating === project.id ? 'Copying…' : 'Duplicate'}
+              </button>
+              <button onClick={(e) => handleDelete(e, project)} className="text-[11px] text-stone-300 hover:text-red-500 font-semibold">
+                Remove
+              </button>
+            </div>
           </div>
         </Link>
       ))}

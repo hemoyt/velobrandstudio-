@@ -2,7 +2,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import type { BrandIdentity } from '@/types';
 import type { AIProvider, ImageEditParams, ImageGenParams, VideoGenParams } from './types';
 import { AIProviderError } from './types';
-import { brandIdentityInstruction } from './brand-prompt';
+import { brandIdentityInstruction, regenerateFieldInstruction, type RegenerableField } from './brand-prompt';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -16,6 +16,12 @@ async function retryOperation<T>(operation: () => Promise<T>, retries = 2, delay
     }
     throw error;
   }
+}
+
+/** Lightweight live check that a Gemini key actually works. Throws on failure. */
+export async function verifyGeminiKey(apiKey: string): Promise<void> {
+  const ai = new GoogleGenAI({ apiKey });
+  await ai.models.get({ model: 'gemini-2.5-flash' });
 }
 
 export function createGeminiProvider(apiKey: string): AIProvider {
@@ -88,12 +94,33 @@ export function createGeminiProvider(apiKey: string): AIProvider {
               brandVoice: { type: Type.STRING },
               tagline: { type: Type.STRING },
               targetAudience: { type: Type.STRING },
+              elevatorPitch: { type: Type.STRING },
+              imageryStyle: { type: Type.STRING },
+              sampleCaptions: { type: Type.ARRAY, items: { type: Type.STRING } },
+              socialBios: {
+                type: Type.OBJECT,
+                properties: {
+                  instagram: { type: Type.STRING },
+                  twitter: { type: Type.STRING },
+                  linkedin: { type: Type.STRING },
+                },
+              },
             },
           },
         },
       });
 
       return JSON.parse(response.text || '{}');
+    },
+
+    async regenerateIdentityField(field: RegenerableField, description: string, identity): Promise<unknown> {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: regenerateFieldInstruction(field, description, identity),
+        config: { responseMimeType: 'application/json' },
+      });
+      const parsed = JSON.parse(response.text || '{}');
+      return parsed.value;
     },
 
     async optimizeLogoPrompt(description: string, style?: string): Promise<string> {

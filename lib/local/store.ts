@@ -40,6 +40,11 @@ export class HttpError extends Error {
 export interface StudioSettings {
   openaiApiKey: string | null;
   geminiApiKey: string | null;
+  openrouterApiKey: string | null;
+  /** Model slug for OpenRouter text calls, e.g. "anthropic/claude-3.5-haiku". Empty = provider default. */
+  openrouterTextModel: string | null;
+  /** Model slug for OpenRouter image calls. Must be a model OpenRouter has enabled image output for. */
+  openrouterImageModel: string | null;
   /** Absolute path where generated designs are saved. */
   outputDir: string;
 }
@@ -50,10 +55,20 @@ export async function getSettings(): Promise<StudioSettings> {
     return {
       openaiApiKey: typeof raw.openaiApiKey === 'string' && raw.openaiApiKey ? raw.openaiApiKey : null,
       geminiApiKey: typeof raw.geminiApiKey === 'string' && raw.geminiApiKey ? raw.geminiApiKey : null,
+      openrouterApiKey: typeof raw.openrouterApiKey === 'string' && raw.openrouterApiKey ? raw.openrouterApiKey : null,
+      openrouterTextModel: typeof raw.openrouterTextModel === 'string' && raw.openrouterTextModel ? raw.openrouterTextModel : null,
+      openrouterImageModel: typeof raw.openrouterImageModel === 'string' && raw.openrouterImageModel ? raw.openrouterImageModel : null,
       outputDir: typeof raw.outputDir === 'string' && raw.outputDir ? raw.outputDir : DEFAULT_OUTPUT_DIR,
     };
   } catch {
-    return { openaiApiKey: null, geminiApiKey: null, outputDir: DEFAULT_OUTPUT_DIR };
+    return {
+      openaiApiKey: null,
+      geminiApiKey: null,
+      openrouterApiKey: null,
+      openrouterTextModel: null,
+      openrouterImageModel: null,
+      outputDir: DEFAULT_OUTPUT_DIR,
+    };
   }
 }
 
@@ -62,6 +77,9 @@ export async function saveSettings(update: Partial<StudioSettings>): Promise<Stu
   const next: StudioSettings = {
     openaiApiKey: update.openaiApiKey !== undefined ? update.openaiApiKey : current.openaiApiKey,
     geminiApiKey: update.geminiApiKey !== undefined ? update.geminiApiKey : current.geminiApiKey,
+    openrouterApiKey: update.openrouterApiKey !== undefined ? update.openrouterApiKey : current.openrouterApiKey,
+    openrouterTextModel: update.openrouterTextModel !== undefined ? update.openrouterTextModel : current.openrouterTextModel,
+    openrouterImageModel: update.openrouterImageModel !== undefined ? update.openrouterImageModel : current.openrouterImageModel,
     outputDir: update.outputDir !== undefined && update.outputDir ? update.outputDir : current.outputDir,
   };
 

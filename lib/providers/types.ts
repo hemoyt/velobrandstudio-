@@ -1,7 +1,7 @@
 import type { BrandIdentity } from '@/types';
 import type { RegenerableField } from './brand-prompt';
 
-export type AiProvider = 'openai' | 'gemini';
+export type AiProvider = 'openai' | 'gemini' | 'openrouter';
 
 export class AIProviderError extends Error {
   status: number;

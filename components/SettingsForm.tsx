@@ -6,9 +6,14 @@ import { Button } from '@/components/Button';
 interface SettingsData {
   openaiKeyHint: string | null;
   geminiKeyHint: string | null;
+  openrouterKeyHint: string | null;
+  openrouterTextModel: string | null;
+  openrouterImageModel: string | null;
   outputDir: string;
   defaultOutputDir: string;
 }
+
+type Provider = 'openai' | 'gemini' | 'openrouter';
 
 async function putSettings(body: Record<string, unknown>): Promise<SettingsData> {
   const res = await fetch('/api/settings', {
@@ -21,7 +26,7 @@ async function putSettings(body: Record<string, unknown>): Promise<SettingsData>
   return data as SettingsData;
 }
 
-async function verifyKey(provider: 'openai' | 'gemini', key?: string): Promise<{ ok: boolean; error?: string }> {
+async function verifyKey(provider: Provider, key?: string): Promise<{ ok: boolean; error?: string }> {
   const res = await fetch('/api/settings/verify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -40,7 +45,7 @@ function KeyField({
   onSave,
   onClear,
 }: {
-  provider: 'openai' | 'gemini';
+  provider: Provider;
   label: string;
   help: string;
   hint: string | null;
@@ -129,6 +134,26 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
   const [dirSaved, setDirSaved] = useState(false);
   const [dirError, setDirError] = useState<string | null>(null);
 
+  const [orTextModel, setOrTextModel] = useState(initial.openrouterTextModel ?? '');
+  const [orImageModel, setOrImageModel] = useState(initial.openrouterImageModel ?? '');
+  const [orModelBusy, setOrModelBusy] = useState(false);
+  const [orModelSaved, setOrModelSaved] = useState(false);
+
+  const saveOpenRouterModels = async () => {
+    setOrModelBusy(true);
+    setOrModelSaved(false);
+    try {
+      const next = await putSettings({
+        openrouterTextModel: orTextModel.trim() || null,
+        openrouterImageModel: orImageModel.trim() || null,
+      });
+      setSettings(next);
+      setOrModelSaved(true);
+    } finally {
+      setOrModelBusy(false);
+    }
+  };
+
   const saveDir = async () => {
     if (!dirValue.trim()) return;
     setDirBusy(true);
@@ -171,6 +196,60 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
             onSave={async (v) => setSettings(await putSettings({ geminiApiKey: v }))}
             onClear={async () => setSettings(await putSettings({ geminiApiKey: null }))}
           />
+          <KeyField
+            provider="openrouter"
+            label="OpenRouter API key"
+            help="Optional. One key, hundreds of models (Claude, Gemini, Llama, DeepSeek, ...) — used as a fallback for text and image if OpenAI/Gemini aren't set, or to run either on a model you pick below. No video model. Get one at openrouter.ai/keys."
+            hint={settings.openrouterKeyHint}
+            onSave={async (v) => setSettings(await putSettings({ openrouterApiKey: v }))}
+            onClear={async () => setSettings(await putSettings({ openrouterApiKey: null }))}
+          />
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-serif font-bold text-stone-900 mb-1">OpenRouter model picker</h2>
+        <p className="text-sm text-stone-500 mb-5">
+          Only used when OpenRouter is the active provider. Paste any model slug from{' '}
+          <span className="font-mono">openrouter.ai/models</span> — leave blank for sensible defaults. Image
+          generation only works on models OpenRouter has enabled image output for (the default below is one of them).
+        </p>
+        <div className="bg-white rounded-2xl border border-stone-200 p-6 space-y-4">
+          <div>
+            <label className="text-xs font-bold text-stone-700 block mb-1.5">Text model</label>
+            <input
+              value={orTextModel}
+              onChange={(e) => {
+                setOrTextModel(e.target.value);
+                setOrModelSaved(false);
+              }}
+              placeholder="openai/gpt-4o-mini"
+              className="w-full px-4 py-2.5 border border-stone-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-1 focus:ring-stone-900"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-stone-700 block mb-1.5">Image model</label>
+            <input
+              value={orImageModel}
+              onChange={(e) => {
+                setOrImageModel(e.target.value);
+                setOrModelSaved(false);
+              }}
+              placeholder="google/gemini-2.5-flash-image-preview"
+              className="w-full px-4 py-2.5 border border-stone-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-1 focus:ring-stone-900"
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              onClick={saveOpenRouterModels}
+              isLoading={orModelBusy}
+              disabled={orTextModel === (settings.openrouterTextModel ?? '') && orImageModel === (settings.openrouterImageModel ?? '')}
+            >
+              Save
+            </Button>
+            {orModelSaved && <p className="text-sm text-green-700">Saved.</p>}
+          </div>
         </div>
       </section>
 

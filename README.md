@@ -22,10 +22,11 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000), go to **Settings**, paste your OpenAI and/or Gemini API key, and pick the folder where your designs should be saved. That's the entire setup — no database, no account, no environment variables.
+Open [http://localhost:3000](http://localhost:3000), go to **Settings**, paste an API key, and pick the folder where your designs should be saved. That's the entire setup — no database, no account, no environment variables.
 
-- One key of either kind runs the whole studio (logos, identity, mockups).
-- A **Gemini** key additionally unlocks video generation (Veo).
+- One key of any kind runs the whole studio (logos, identity, mockups).
+- A **Gemini** key additionally unlocks video generation (Veo) — no other provider offers video.
+- An **OpenRouter** key is optional flexibility: one key, hundreds of models (Claude, Gemini, Llama, DeepSeek, ...), picked by typing a model slug in Settings. It's used as a fallback if OpenAI/Gemini aren't set, or you can point either capability at it directly to try a different model.
 - Keys are stored only on your machine (`~/.velobrand/settings.json`) and are sent nowhere except directly to the provider.
 
 ## Tour
@@ -73,9 +74,11 @@ Deleting a project in the app only removes its record — your design files are 
 
 | Capability | Runs on | Notes |
 |---|---|---|
-| Image generation & editing | OpenAI **GPT Image 2** (preferred) or Gemini | Whichever key you've added; OpenAI wins if both. |
-| Brand identity & prompt helpers | Gemini `gemini-2.5-flash` (preferred) or OpenAI `gpt-4o-mini` | Works with either key. |
-| Video | Gemini **Veo 3.1** only | OpenAI has no video model. |
+| Image generation & editing | OpenAI **GPT Image 2** (preferred) → Gemini → OpenRouter | Whichever key you've added, in that order. OpenRouter only works on the models it's enabled image output for (default: `google/gemini-2.5-flash-image-preview`). |
+| Brand identity & prompt helpers | Gemini `gemini-2.5-flash` (preferred) → OpenAI `gpt-4o-mini` → OpenRouter | OpenRouter's model is configurable in Settings — any chat model on openrouter.ai/models works. |
+| Video | Gemini **Veo 3.1** only | Neither OpenAI nor OpenRouter offer a video model today. |
+
+**Why OpenRouter?** It's a single OpenAI-compatible API in front of hundreds of models from many labs, so it's the "flexibility" option — swap models without touching code, keep working if OpenAI/Gemini have an outage, or try a cheaper/better model for text as they change. It's not a dedicated image/video service: image support is limited to the few multimodal chat models OpenRouter has turned image output on for, and it has no video generation at all.
 
 ## Run with Docker
 

@@ -25,6 +25,9 @@ export default async function SettingsPage() {
           initial={{
             openaiKeyHint: hint(settings.openaiApiKey),
             geminiKeyHint: hint(settings.geminiApiKey),
+            openrouterKeyHint: hint(settings.openrouterApiKey),
+            openrouterTextModel: settings.openrouterTextModel,
+            openrouterImageModel: settings.openrouterImageModel,
             outputDir: settings.outputDir,
             defaultOutputDir: defaultOutputDir(),
           }}
